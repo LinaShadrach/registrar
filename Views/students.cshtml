@@ -1,0 +1,13 @@
+@{
+  Layout="Shared/_Layout.cshtml";
+}
+
+<h3>Students</h3>
+<ul>
+@foreach(var student in Model)
+{
+  <li><a href="/student/@student.Id">@student.Name</a></li>
+}
+</ul>
+
+<a href="/">Return to Home</a>

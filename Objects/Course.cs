@@ -9,12 +9,15 @@ namespace Registrar.Objects
     public int Id {get; set;}
     public string Name {get; set;}
     public string Description {get; set;}
+    public int MajorId {get; set;}
 
-    public Course(string name, string description, int id = 0)
+
+    public Course(string name, string description, int major = 0, int id = 0)
     {
       this.Id = id;
       this.Name = name;
       this.Description = description;
+      this.MajorId = major;
     }
 
     public override bool Equals(System.Object otherCourse)
@@ -28,7 +31,8 @@ namespace Registrar.Objects
         Course newCourse = (Course) otherCourse;
         bool nameEquality = (this.Name == newCourse.Name);
         bool descriptionEquality = (this.Description == newCourse.Description);
-        return (nameEquality && descriptionEquality);
+        bool majorEquality = (this.MajorId == newCourse.MajorId);
+        return (nameEquality && descriptionEquality && majorEquality);
       }
     }
     public override int GetHashCode()
@@ -41,13 +45,14 @@ namespace Registrar.Objects
       SqlConnection conn = DB.Connection();
       conn.Open();
 
-      SqlCommand cmd = new SqlCommand("INSERT INTO courses (name, description) OUTPUT INSERTED.id VALUES (@CourseName, @CourseDescription);", conn);
+      SqlCommand cmd = new SqlCommand("INSERT INTO courses (name, description, major_id) OUTPUT INSERTED.id VALUES (@CourseName, @CourseDescription, @MajorId);", conn);
 
       SqlParameter courseNameParameter = new SqlParameter("@CourseName", this.Name);
       cmd.Parameters.Add(courseNameParameter);
       SqlParameter courseDescriptionParameter = new SqlParameter("@CourseDescription", this.Description);
       cmd.Parameters.Add(courseDescriptionParameter);
-
+      SqlParameter courseMajorParameter = new SqlParameter("@MajorId", this.MajorId);
+      cmd.Parameters.Add(courseMajorParameter);
 
       SqlDataReader rdr = cmd.ExecuteReader();
 
@@ -80,7 +85,9 @@ namespace Registrar.Objects
         int courseId = rdr.GetInt32(0);
         string courseName = rdr.GetString(1);
         string description = rdr.GetString(2);
-        Course newCourse = new Course(courseName, description, courseId);
+        int majorId = rdr.GetInt32(4);
+
+        Course newCourse = new Course(courseName, description, majorId, courseId);
         courseList.Add(newCourse);
       }
 
@@ -109,14 +116,17 @@ namespace Registrar.Objects
       int foundCourseId = 0;
       string foundCourseName = null;
       string foundCourseDescription = null;
+      int foundCourseMajorId = 0;
 
       while(rdr.Read())
       {
         foundCourseId = rdr.GetInt32(0);
         foundCourseName = rdr.GetString(1);
         foundCourseDescription = rdr.GetString(2);
+        foundCourseMajorId = rdr.GetInt32(4);
+
       }
-      Course foundCourse = new Course(foundCourseName, foundCourseDescription, foundCourseId);
+      Course foundCourse = new Course(foundCourseName, foundCourseDescription, foundCourseMajorId, foundCourseId);
 
       if (rdr != null)
       {
@@ -129,24 +139,22 @@ namespace Registrar.Objects
 
       return foundCourse;
     }
-    public void Edit(string name, string description)
+    public void Edit(string name, string description, int majorId)
     {
       SqlConnection conn = DB.Connection();
       conn.Open();
 
-      SqlCommand cmd = new SqlCommand("UPDATE courses SET name = @CourseName, description = @Description OUTPUT INSERTED.id, INSERTED.name, INSERTED.description WHERE id = @CourseId;", conn);
+      SqlCommand cmd = new SqlCommand("UPDATE courses SET name = @CourseName, description = @Description, major_id = @MajorID OUTPUT INSERTED.id, INSERTED.name, INSERTED.description, INSERTED.major_id WHERE id = @CourseId;", conn);
 
       SqlParameter courseIdParameter = new SqlParameter("@CourseId", this.Id);
-
        SqlParameter courseNameParameter = new SqlParameter("@CourseName", name);
-
        SqlParameter courseDescriptionParameter = new SqlParameter("@Description", description);
-
+       SqlParameter courseMajorIdParameter = new SqlParameter("@MajorID", majorId);
 
        cmd.Parameters.Add(courseIdParameter);
        cmd.Parameters.Add(courseNameParameter);
        cmd.Parameters.Add(courseDescriptionParameter);
-
+       cmd.Parameters.Add(courseMajorIdParameter);
 
        SqlDataReader rdr = cmd.ExecuteReader();
 
@@ -155,6 +163,7 @@ namespace Registrar.Objects
          this.Id = rdr.GetInt32(0);
          this.Name = rdr.GetString(1);
          this.Description= rdr.GetString(2);
+         this.MajorId = rdr.GetInt32(3);
        }
        if (rdr != null)
        {
@@ -181,7 +190,8 @@ namespace Registrar.Objects
         int courseId = rdr.GetInt32(0);
         string courseName = rdr.GetString(1);
         string description = rdr.GetString(2);
-        Course newCourse = new Course(courseName, description, courseId);
+        int majorId = rdr.GetInt32(4);
+        Course newCourse = new Course(courseName, description, majorId, courseId);
         allCourses.Add(newCourse);
       }
 
@@ -202,8 +212,8 @@ namespace Registrar.Objects
       SqlConnection conn = DB.Connection();
       conn.Open();
       SqlCommand cmd = new SqlCommand("INSERT INTO courses_students (course_id, student_id) VALUES (@CourseId, @StudentId);", conn);
-      SqlParameter courseParam = new SqlParameter("@CourseId", this.Id);
-      SqlParameter studentParam = new SqlParameter("@StudentId", newStudent.Id);
+      SqlParameter courseParam = new SqlParameter("@CourseId", this.Id.ToString());
+      SqlParameter studentParam = new SqlParameter("@StudentId", newStudent.Id.ToString());
       cmd.Parameters.Add(courseParam);
       cmd.Parameters.Add(studentParam);
       cmd.ExecuteNonQuery();

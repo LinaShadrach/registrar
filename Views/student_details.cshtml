@@ -1,0 +1,24 @@
+@{
+  Layout="Shared/_Layout.cshtml";
+}
+
+
+<h3>@Model["student"].Name</h3>
+<h4>Enrollment Date: @Model["student"].GetEnrollmentDate()</h4>
+
+<h4>Major: @Model["majorName"]</h4>
+<h3>Edit Student Information:</h3>
+<form action='/student/form/edit/@Model["student"].Id' method="post">
+  <input type="hidden" name="_method" value="PATCH">
+  <input type="text" name="student-name" required>
+  <input type="date" name="enrollment-date" required>
+  <select name="major-name" required>
+    @foreach (var major in Model["majors"])
+    {
+      <option value=@major.Id>@major.Name</option>
+    }
+  </select>
+  <button type="submit" name="button">Submit</button>
+</form>
+<a href="/">Return to Home</a>
+<a href="/students">View Students</a>

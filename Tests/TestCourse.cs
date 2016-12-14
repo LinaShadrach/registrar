@@ -48,9 +48,9 @@ namespace  Registrar
     {
       Course newCourse = new Course("Anatomy and Physiology 201", "A&P Course designed to prepare students for a nursing program.");
       newCourse.Save();
-      newCourse.Edit("Anatomy and Physiology 202", "This course is, like, way harder for realz.");
+      newCourse.Edit("Anatomy and Physiology 202", "This course is, like, way harder for realz.", 1);
 
-      Course newerCourse = new Course("Anatomy and Physiology 202", "This course is, like, way harder for realz.");
+      Course newerCourse = new Course("Anatomy and Physiology 202", "This course is, like, way harder for realz.", 1);
 
       Assert.Equal(newCourse, newerCourse);
     }
@@ -69,7 +69,30 @@ namespace  Registrar
       Student foundStudent = foundStudentList[0];
       Assert.Equal(newStudent, foundStudent);
     }
+    [Fact]
+    public void Major_GetsCoursesInMajor_true()
+    {
+      Course newCourse = new Course("Anatomy and Physiology 201", "A&P Course designed to prepare students for a nursing program.", 0);
+      newCourse.Save();
+      Major major = new Major();
+      List<Course> expectedCourses = new List<Course>{newCourse};
 
+      List<Course> courses = major.GetCourses();
+
+      Assert.Equal(expectedCourses, courses);
+    }
+    [Fact]
+    public void Major_GetsStudentsInMajor_true()
+    {
+      Student newStudent = new Student("Jo Bob", testDate, 0);
+      newStudent.Save();
+      Major major = new Major();
+      List<Student> expectedStudents = new List<Student>{newStudent};
+
+      List<Student> students = major.GetStudents();
+
+      Assert.Equal(expectedStudents, students);
+    }
     public void Dispose()
     {
       Course.DeleteAll();

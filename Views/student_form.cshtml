@@ -1,0 +1,15 @@
+@{
+  Layout="Shared/_Layout.cshtml";
+}
+
+<form action="/student/form/submit" method="post">
+  <input type="text" name="student-name" required>
+  <input type="date" name="enrollment-date" required>
+  <select name="major-name" required>
+    @foreach (var major in Model)
+    {
+      <option value=@major.Id>@major.Name</option>
+    }
+  </select>
+  <button type="submit" name="button">Submit</button>
+</form>

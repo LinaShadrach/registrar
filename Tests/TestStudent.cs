@@ -47,11 +47,25 @@ namespace  Registrar
     {
       Student newStudent = new Student("Jo Bob", testDate);
       newStudent.Save();
-      newStudent.Edit("Jim Bob", testDate);
+      newStudent.Edit("Jim Bob", testDate, 1);
 
       Student newerStudent = new Student("Jim Bob", testDate);
 
       Assert.Equal(newStudent, newerStudent);
+    }
+    [Fact]
+    public void Add_AddsCourseToStudent()
+    {
+      Course newCourse = new Course("Anatomy and Physiology 201", "A&P Course designed to prepare students for a nursing program.");
+      newCourse.Save();
+      Student newStudent = new Student("Jo Bob", testDate);
+      newStudent.Save();
+
+      newStudent.AddCourse(newCourse);
+
+      List<Course> foundCourseList = newStudent.GetCourses();
+      Course foundCourse = foundCourseList[0];
+      Assert.Equal(newCourse, foundCourse);
     }
 
     public void Dispose()
